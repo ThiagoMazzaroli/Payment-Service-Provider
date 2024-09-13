@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum metodoPagamento {
+  cartao_debito
+  cartao_credito
+}
+
+enum payableStatus {
+  vaiReceber
+  recebeu
+}
+
+model transactions {
+  id                   Int             @id @default(autoincrement())
+  valor                Decimal         @db.Decimal(10, 2)
+  descricao            String
+  metodoPagamento      metodoPagamento
+  cartaoNumero         Int             @unique
+  nomePortador         String
+  validadeCartao       DateTime
+  codigoVerificaCartao Int
+}
+
+model payables {
+  id            Int           @id @default(autoincrement())
+  status        payableStatus
+  dataPagamento DateTime      @default(now())
+}
