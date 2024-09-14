@@ -17,14 +17,29 @@ export const createTransactions = async (req, res) =>{
             codigoVerificaCartao: req.body.codigoVerificaCartao
           },
         })
+
+        const pagamentoDebito = metodoPagamento.cartao_debito
+          
         const createdPayables = await prisma.payables.create({
           data: {
+            status: metodoPagamento === pagamentoDebito ? "recebeu" : "vaiReceber",   
           },
         })
-        res.status(201).json({message: "transação criada, informações:", createdTransactions})
+        res.status(201).json({message: "transação criada, informações:", createdTransactions, createdPayables})
 }
 
  export const listTransactions = async (req, res) => {
       const listAllTransactions = await prisma.transactions.findMany()
       res.status(200).json(listAllTransactions)
+}
+
+export const deleteTransactions = async (req, res) => {
+  const {id} = req.params
+  const deleteTansaction = await prisma.transactions.delete({
+    where: {
+      id: Number(id)
+    },
+    
+  })
+  res.status(200).json({message: "Usuario deletado!"})
 }
