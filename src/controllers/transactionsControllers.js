@@ -19,18 +19,28 @@ export const createTransactions = async (req, res) =>{
         })
 
         const pagamentoDebito = metodoPagamento.cartao_debito
+        let dataAtual = new Date(); 
+        const dataPrazo = new Date(dataAtual)
+        dataPrazo.setDate(dataAtual.getDate() + 30);
           
         const createdPayables = await prisma.payables.create({
           data: {
-            status: metodoPagamento === pagamentoDebito ? "recebeu" : "vaiReceber",   
+            status: req.body.metodoPagamento === pagamentoDebito ? "recebeu" : "vaiReceber",
+            dataPagamento: req.body.metodoPagamento != pagamentoDebito ? dataPrazo : dataAtual 
           },
         })
         res.status(201).json({message: "transação criada, informações:", createdTransactions, createdPayables})
 }
 
+
  export const listTransactions = async (req, res) => {
       const listAllTransactions = await prisma.transactions.findMany()
-      res.status(200).json(listAllTransactions)
+      res.status(200).json( listAllTransactions)
+}
+
+export const listPayables = async (req, res) => {
+  const listAllPayables = await prisma.payables.findMany()
+  res.status(200).json( listAllPayables)
 }
 
 export const deleteTransactions = async (req, res) => {
