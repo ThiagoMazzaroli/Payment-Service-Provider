@@ -5,10 +5,13 @@ import { metodoPagamento, PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export const createTransactions = async (req, res) =>{
-    
+        const taxaDebito = req.body.valor * 0.03
+        const taxaPrazo = req.body.valor *  0.05
+        const valorComtaxa = req.body.metodoPagamento === "cartao_debito" ? req.body.valor - taxaDebito : req.body.valor - taxaPrazo
         const createdTransactions = await prisma.transactions.create({
+          
           data: {
-            valor: req.body.valor,              
+            valor: valorComtaxa,              
             descricao: req.body.descricao,            
             metodoPagamento: req.body.metodoPagamento,    
             cartaoNumero: req.body.cartaoNumero,         
@@ -17,6 +20,7 @@ export const createTransactions = async (req, res) =>{
             codigoVerificaCartao: req.body.codigoVerificaCartao
           },
         })
+
 
         const pagamentoDebito = metodoPagamento.cartao_debito
         let dataAtual = new Date(); 
@@ -29,6 +33,9 @@ export const createTransactions = async (req, res) =>{
             dataPagamento: req.body.metodoPagamento != pagamentoDebito ? dataPrazo : dataAtual 
           },
         })
+
+        
+        
         res.status(201).json({message: "transação criada, informações:", createdTransactions, createdPayables})
 }
 
@@ -52,4 +59,10 @@ export const deleteTransactions = async (req, res) => {
     
   })
   res.status(200).json({message: "Usuario deletado!"})
+}
+
+export const saldoPayables = async (req, res) => {
+  const listAllPayables = await prisma.payables.findMany()
+  
+  res.status(200).json( listAllPayables)
 }
